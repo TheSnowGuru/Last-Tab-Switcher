@@ -1,7 +1,36 @@
 // Background script for Chrome Extension
+// Function to save the current tab to history
+function saveTabToHistory(windowId, tabId) {
+  chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
+    let windowHistory = result.tabHistoryWithPosition[windowId.toString()] || { currentPosition: 0, history: [] };
+    windowHistory.history.push(tabId);
+    windowHistory.currentPosition++;
+    result.tabHistoryWithPosition[windowId.toString()] = windowHistory;
+    chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition});
+  });
+}
 
 // Object to hold tab history and current position per window
 const tabHistoryWithPosition = {};
+// Navigate back in history on command or icon click
+function navigateBackInHistory(windowId) {
+  chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
+      const windowHistory = result.tabHistoryWithPosition[windowId.toString()];
+      if (windowHistory && windowHistory.currentPosition > 0) {
+          const lastTabId = windowHistory.history[windowHistory.currentPosition - 1];
+          saveTabToHistory(windowId, lastTabId); // Save the current tab to history
+          chrome.tabs.get(lastTabId, (tab) => {
+              if (!chrome.runtime.lastError) {
+                  // Tab exists, activate it
+                  chrome.tabs.update(lastTabId, {active: true});
+                  // Save the updated position after successful navigation
+                  chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition});
+              }
+          });
+      }
+  });
+}
+
 
 // Update tab history and reset position on tab activation
 chrome.tabs.onActivated.addListener(activeInfo => {
