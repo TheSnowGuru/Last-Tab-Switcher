@@ -1,62 +1,64 @@
 // Background script for Chrome Extension
 
-// Object to hold tab history per window, each with a maximum of 10 entries
-const tabHistoryPerWindow = {};
+// Object to hold tab history and current position per window
+const tabHistoryWithPosition = {};
 
-// Listen for tab activation to update history
+// Update tab history and reset position on tab activation
 chrome.tabs.onActivated.addListener(activeInfo => {
-    updateTabHistory(activeInfo.tabId, activeInfo.windowId);
-});
+    chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
+        const {tabHistoryWithPosition} = result;
+        const windowId = activeInfo.windowId.toString(); // Ensure windowId is a string for consistency
 
-// Listen for tab closure to remove it from history
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
-    if (tabHistoryPerWindow[removeInfo.windowId]) {
-        const index = tabHistoryPerWindow[removeInfo.windowId].indexOf(tabId);
-        if (index > -1) {
-            tabHistoryPerWindow[removeInfo.windowId].splice(index, 1);
+        if (!tabHistoryWithPosition[windowId]) {
+            tabHistoryWithPosition[windowId] = {history: [], currentPosition: -1};
         }
-    }
+
+        // Update history, ensuring no duplicates and updating current position
+        updateHistoryAndPosition(tabHistoryWithPosition[windowId], activeInfo.tabId);
+
+        chrome.storage.local.set({tabHistoryWithPosition});
+    });
 });
 
-// Function to update tab history
-function updateTabHistory(tabId, windowId) {
-    if (!tabHistoryPerWindow[windowId]) {
-        tabHistoryPerWindow[windowId] = [];
+function updateHistoryAndPosition(windowHistory, tabId) {
+    // Remove tabId if it exists to prevent duplicates
+    const index = windowHistory.history.indexOf(tabId);
+    if (index > -1) {
+        windowHistory.history.splice(index, 1);
     }
+    // Add tabId to the end and update currentPosition to the last
+    windowHistory.history.push(tabId);
+    windowHistory.currentPosition = windowHistory.history.length - 1;
 
-    const history = tabHistoryPerWindow[windowId];
-    const existingIndex = history.indexOf(tabId);
-
-    // Remove tabId if it exists to re-add it at the end
-    if (existingIndex > -1) {
-        history.splice(existingIndex, 1);
-    }
-
-    // Add tabId to the end and ensure history does not exceed 10 tabs
-    history.push(tabId);
-    if (history.length > 10) {
-        history.shift(); // Remove the oldest tab
+    // Ensure the history doesn't exceed 10 tabs
+    if (windowHistory.history.length > 10) {
+        windowHistory.history.shift();
+        windowHistory.currentPosition--;
     }
 }
 
-// Command listener for switching to the last tab
+// Navigate back in history on command or icon click
+function navigateBackInHistory(windowId) {
+    chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
+        const windowHistory = result.tabHistoryWithPosition[windowId.toString()];
+        if (windowHistory && windowHistory.currentPosition > 0) {
+            // Move back in history
+            windowHistory.currentPosition--;
+            const lastTabId = windowHistory.history[windowHistory.currentPosition];
+            chrome.tabs.update(lastTabId, {active: true});
+
+            // Save the updated position
+            chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition});
+        }
+    });
+}
+
 chrome.commands.onCommand.addListener((command, tab) => {
     if (command === "switch_to_last_tab") {
-        const windowId = tab.windowId;
-        if (tabHistoryPerWindow[windowId] && tabHistoryPerWindow[windowId].length > 1) {
-            const lastTabIndex = tabHistoryPerWindow[windowId].length - 2; // Second to last index
-            const lastTabId = tabHistoryPerWindow[windowId][lastTabIndex];
-            chrome.tabs.update(lastTabId, { active: true });
-        }
+        navigateBackInHistory(tab.windowId);
     }
 });
 
-// Click on extension icon to switch to the last tab
 chrome.action.onClicked.addListener((tab) => {
-    const windowId = tab.windowId;
-    if (tabHistoryPerWindow[windowId] && tabHistoryPerWindow[windowId].length > 1) {
-        const lastTabIndex = tabHistoryPerWindow[windowId].length - 2; // Second to last index
-        const lastTabId = tabHistoryPerWindow[windowId][lastTabIndex];
-        chrome.tabs.update(lastTabId, { active: true });
-    }
+    navigateBackInHistory(tab.windowId);
 });
