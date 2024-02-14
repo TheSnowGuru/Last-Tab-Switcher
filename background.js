@@ -1,45 +1,44 @@
-let tabHistory = {}; // Track tab visit history per window
+let tabHistory = {}; // Track tab visit history per window, storing the last 10 tabs
 
 // Update tab history when a tab is activated
 chrome.tabs.onActivated.addListener(activeInfo => {
-  // Get the window ID to manage history per window
   chrome.windows.getCurrent({populate: true}, currentWindow => {
-    if (!tabHistory[currentWindow.id]) {
-      tabHistory[currentWindow.id] = [];
+    const windowId = currentWindow.id;
+    if (!tabHistory[windowId]) {
+      tabHistory[windowId] = [];
     }
     // Move the newly activated tab ID to the end of the history array for the current window
-    tabHistory[currentWindow.id] = tabHistory[currentWindow.id].filter(id => id !== activeInfo.tabId);
-    tabHistory[currentWindow.id].push(activeInfo.tabId);
+    tabHistory[windowId] = tabHistory[windowId].filter(id => id !== activeInfo.tabId);
+    tabHistory[windowId].push(activeInfo.tabId);
+
+    // Ensure the history doesn't exceed 10 tabs
+    if (tabHistory[windowId].length > 10) {
+      tabHistory[windowId].shift(); // Remove the oldest tab to maintain a maximum of 10
+    }
   });
 });
 
 chrome.commands.onCommand.addListener((command) => {
   if (command === "switch_to_last_tab") {
     chrome.windows.getCurrent({populate: true}, currentWindow => {
-      let windowHistory = tabHistory[currentWindow.id] || [];
+      const windowId = currentWindow.id;
+      let windowHistory = tabHistory[windowId] || [];
       if (windowHistory.length > 1) {
-        // Switch to the second last tab in history, which is the last visited for the current window
-        let lastVisitedTabId = windowHistory[windowHistory.length - 2];
-        chrome.tabs.update(lastVisitedTabId, {active: true});
+        // Ensure we don't try to switch to a non-existent tab (in case it was closed)
+        let indexToSwitch = windowHistory.length - 2; // Second last tab
+        let lastVisitedTabId = windowHistory[indexToSwitch];
+        chrome.tabs.update(lastVisitedTabId, {active: true}, () => {
+          if (chrome.runtime.lastError && windowHistory.length > 2) {
+            // If the tab could not be found (it might have been closed), try the next one
+            tabHistory[windowId].splice(indexToSwitch, 1); // Remove the non-existent tab
+            chrome.commands.update({active: true}); // Attempt to switch again
+          }
+        });
       }
     });
   }
 });
-// Assuming you have a function to switch to the last visited tab
-function switchToLastVisitedTab() {
-  chrome.windows.getCurrent({populate: true}, currentWindow => {
-    let windowHistory = tabHistory[currentWindow.id] || [];
-    if (windowHistory.length > 1) {
-      let lastVisitedTabId = windowHistory[windowHistory.length - 2];
-      chrome.tabs.update(lastVisitedTabId, {active: true});
-    }
-  });
-}
 
-// Listen for clicks on the extension icon
-chrome.action.onClicked.addListener((tab) => {
-  switchToLastVisitedTab();
-});
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
   // Remove closed tabs from history and handle per window
   if (tabHistory[removeInfo.windowId]) {
