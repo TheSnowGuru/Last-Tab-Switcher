@@ -33,32 +33,21 @@ function navigateBackInHistory(windowId) {
 
 
 // Update tab history and reset position on tab activation
-chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
+chrome.tabs.onActivated.addListener(activeInfo => {
     chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
         const {tabHistoryWithPosition} = result;
-        const windowId = removeInfo.windowId.toString(); // Ensure windowId is a string for consistency
+        const windowId = activeInfo.windowId.toString(); // Ensure windowId is a string for consistency
 
         if (!tabHistoryWithPosition[windowId]) {
             tabHistoryWithPosition[windowId] = {history: [], currentPosition: -1};
         }
 
         // Update history, ensuring no duplicates and updating current position
-        updateHistoryAndShiftPosition(tabHistoryWithPosition[windowId], tabId);
+        updateHistoryAndPosition(tabHistoryWithPosition[windowId], activeInfo.tabId);
 
         chrome.storage.local.set({tabHistoryWithPosition});
     });
 });
-
-function updateHistoryAndShiftPosition(tabHistory, removedTabId) {
-    const index = tabHistory.history.indexOf(removedTabId);
-    if (index !== -1) {
-        tabHistory.history.splice(index, 1);
-        if (index <= tabHistory.currentPosition) {
-            tabHistory.currentPosition--;
-        }
-        chrome.storage.local.set({tabHistoryWithPosition});
-    }
-}
 
 function updateHistoryAndPosition(windowHistory, tabId) {
     // Remove tabId if it exists to prevent duplicates
