@@ -25,7 +25,21 @@ chrome.commands.onCommand.addListener((command) => {
     });
   }
 });
+// Assuming you have a function to switch to the last visited tab
+function switchToLastVisitedTab() {
+  chrome.windows.getCurrent({populate: true}, currentWindow => {
+    let windowHistory = tabHistory[currentWindow.id] || [];
+    if (windowHistory.length > 1) {
+      let lastVisitedTabId = windowHistory[windowHistory.length - 2];
+      chrome.tabs.update(lastVisitedTabId, {active: true});
+    }
+  });
+}
 
+// Listen for clicks on the extension icon
+chrome.action.onClicked.addListener((tab) => {
+  switchToLastVisitedTab();
+});
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
   // Remove closed tabs from history and handle per window
   if (tabHistory[removeInfo.windowId]) {
