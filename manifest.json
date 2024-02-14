@@ -10,8 +10,8 @@
   "commands": {
     "switch_to_last_tab": {
       "suggested_key": {
-        "default": "Ctrl+B",
-        "mac": "Command+B"
+        "default": "Alt+Shift+C",
+        "mac": "Alt+Shift+C"
       },
       "description": "Switch to the Last Visited Tab"
     }
