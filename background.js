@@ -42,25 +42,9 @@ function navigateBackInHistory(windowId) {
   chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
       const windowHistory = result.tabHistoryWithPosition[windowId.toString()];
       if (windowHistory && windowHistory.currentPosition > 0) {
-          // Decrement the current position to move back in history
-          windowHistory.currentPosition--;
-
-          // If the currentPosition now points to a tab that's no longer active, move back again
-          while (windowHistory.currentPosition > 0 && !windowHistory.history.includes(windowHistory.history[windowHistory.currentPosition])) {
-              windowHistory.currentPosition--;
-          }
-
-          const lastTabId = windowHistory.history[windowHistory.currentPosition];
+          const lastTabId = windowHistory.history[windowHistory.currentPosition - 1];
           chrome.tabs.get(lastTabId, (tab) => {
-              if (chrome.runtime.lastError) {
-                  // If the tab doesn't exist anymore, adjust the history and try again
-                  windowHistory.history.splice(windowHistory.currentPosition, 1); // Remove the non-existent tab from history
-                  if (windowHistory.currentPosition > 0) {
-                      windowHistory.currentPosition--; // Adjust position to account for the removed tab
-                  }
-                  chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition}); // Save updated history
-                  navigateBackInHistory(windowId); // Retry navigation
-              } else {
+              if (!chrome.runtime.lastError) {
                   // Tab exists, activate it
                   chrome.tabs.update(lastTabId, {active: true});
                   // Save the updated position after successful navigation
