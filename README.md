@@ -4,7 +4,7 @@
 
 **Features at Warp Speed:**
 
-1. **Ctrl + B (or Command + B on Mac)**: Your secret teleporter! Press this magical combo, and *poof!* You're back on your last visited tab. It's like Ctrl + Z for your browsing life. 🚪🔮
+1. **Ctrl + Shift + Z (or Command + B on Mac)**: Your secret teleporter! Press this magical combo, and *poof!* You're back on your last visited tab. It's like Ctrl + Z for your browsing life. 🚪🔮
 
 2. **Seamless Tracking**: Imagine a cosmic breadcrumb trail. This extension follows it. It knows where you've been, like a digital Sherlock with a magnifying glass. 🔍🔭
 
