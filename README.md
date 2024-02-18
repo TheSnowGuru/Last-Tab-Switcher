@@ -14,4 +14,4 @@
 
 4. **Streamline Your Odyssey**: No more tab-tango. No more lost constellations. Just one keystroke, and you're surfing the Milky Way like a pro. 🌠🏄‍♂️
 
-So, fellow space traveler, buckle up. The Last Tab Switcher awaits your command! 🛸💫
+So, fellow space traveler, buckle up. The Last TabBack Switcher awaits your command! 🛸💫
