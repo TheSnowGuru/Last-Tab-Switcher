@@ -1,6 +1,9 @@
 // Background script for Chrome Extension
 // Function to save the current tab to history
-function saveTabToHistory(windowId, tabId) {
+function saveTabToHistory(windowId, tabId, openedUsingShortcut) {
+  if (openedUsingShortcut) {
+    return; // Do not save the tab into history if opened using shortcut
+  }
   chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
     let windowHistory = result.tabHistoryWithPosition[windowId.toString()] || { currentPosition: 0, history: [] };
     windowHistory.history.push(tabId);
