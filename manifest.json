@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Last Tab Switcher",
+  "name": "TabBack",
   "version": "1.0",
   "description": "Switch to the last visited tab with Ctrl+B.",
   "permissions": ["tabs", "storage", "activeTab"],
@@ -13,7 +13,7 @@
         "default": "Ctrl+Shift+Z",
         "mac": "Command+Shift+Z"
       },
-      "description": "Switch to the Last Visited Tab"
+      "description": "Switch to the Last Visited Tabs"
     }
   },
   "icons": {
