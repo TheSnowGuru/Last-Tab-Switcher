@@ -79,7 +79,7 @@ function updateHistoryAndPosition(windowHistory, tabId) {
 function navigateBackInHistory(windowId) {
   chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
       const windowHistory = result.tabHistoryWithPosition[windowId.toString()];
-      if (windowHistory && windowHistory.currentPosition > 0) {
+      if (windowHistory && windowHistory.currentPosition > 0 && !windowHistory.fromExtension) {
           const lastTabId = windowHistory.history[windowHistory.currentPosition - 1];
           chrome.tabs.get(lastTabId, (tab) => {
               if (!chrome.runtime.lastError) {
