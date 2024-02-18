@@ -22,23 +22,28 @@ function saveTabToHistory(windowId, tabId, openedUsingShortcut) {
 // Object to hold tab history and current position per window
 const tabHistoryWithPosition = {};
 // Navigate back in history on command or icon click
+// Corrected function to navigate back in history
 function navigateBackInHistory(windowId) {
-  chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
-      const windowHistory = result.tabHistoryWithPosition[windowId.toString()];
-      if (windowHistory && windowHistory.currentPosition > 0) {
-          const lastTabId = windowHistory.history[windowHistory.currentPosition - 1];
-          saveTabToHistory(windowId, lastTabId); // Save the current tab to history
-          chrome.tabs.get(lastTabId, (tab) => {
-              if (!chrome.runtime.lastError) {
-                  // Tab exists, activate it
-                  chrome.tabs.update(lastTabId, {active: true});
-                  // Save the updated position after successful navigation
-                  chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition});
-              }
-          });
+    chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
+      let windowHistory = result.tabHistoryWithPosition[windowId.toString()];
+      if (windowHistory && windowHistory.currentPosition > 1) { // Adjusted to > 1 to properly navigate back
+        windowHistory.currentPosition -= 2; // Move back by two to account for the current and previous tab
+        const lastTabId = windowHistory.history[windowHistory.currentPosition];
+        chrome.tabs.update(lastTabId, {active: true}, () => {
+          if (chrome.runtime.lastError) {
+            console.error("Error activating tab:", chrome.runtime.lastError);
+          } else {
+            // Successfully navigated back, update storage
+            chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition});
+          }
+        });
       }
-  });
-}
+    });
+  }
+  
+  // Adjust saveTabToHistory to properly handle openedUsingShortcut if necessary
+  // Ensure that the logic aligns with the intended behavior, especially regarding the interaction with navigateBackInHistory.
+  
 
 
 // Update tab history and reset position on tab activation
