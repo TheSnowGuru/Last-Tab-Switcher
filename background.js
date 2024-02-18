@@ -2,12 +2,18 @@
 // Function to save the current tab to history
 function saveTabToHistory(windowId, tabId, openedUsingShortcut) {
   if (openedUsingShortcut) {
-    return; // Do not save the tab into history if opened using shortcut
+    // Do not save the tab into history if opened using shortcut
+    // Implement the logic to open the tab in a specific slot based on history
+    // Check if there are already 10 slots filled in the history
+    // If there are 10 slots filled, do not update any slot
+    // Otherwise, open the tab in a specific slot
   }
   chrome.storage.local.get({tabHistoryWithPosition: {}}, (result) => {
     let windowHistory = result.tabHistoryWithPosition[windowId.toString()] || { currentPosition: 0, history: [] };
-    windowHistory.history.push(tabId);
-    windowHistory.currentPosition++;
+    if (!openedUsingShortcut && windowHistory.history.length < 10) {
+      windowHistory.history.push(tabId);
+      windowHistory.currentPosition++;
+    }
     result.tabHistoryWithPosition[windowId.toString()] = windowHistory;
     chrome.storage.local.set({tabHistoryWithPosition: result.tabHistoryWithPosition});
   });
