@@ -1,10 +1,12 @@
-**Why Last Tab Switcher Chrome Extension?**
+**Why TabBack Chrome Extension?**
+![alt text](image.png)
+🚀 **Effortlessly navigate your browsing galaxy** with the **Last TabBack Switcher Chrome Extension**. This isn't just any extension—it's your trusty starship in the vast internet cosmos. 🌌
 
-🚀 **Effortlessly navigate your browsing galaxy** with the **Last Tab Switcher Chrome Extension**. This isn't just any extension—it's your trusty starship in the vast internet cosmos. 🌌
 
 **Features at Warp Speed:**
 
 1. **Ctrl + Shift + Z (or Command + B on Mac)**: Your secret teleporter! Press this magical combo, and *poof!* You're back on your last visited tab. It's like Ctrl + Z for your browsing life. 🚪🔮
+
 
 2. **Seamless Tracking**: Imagine a cosmic breadcrumb trail. This extension follows it. It knows where you've been, like a digital Sherlock with a magnifying glass. 🔍🔭
 
