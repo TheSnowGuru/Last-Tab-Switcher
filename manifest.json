@@ -3,7 +3,7 @@
   "name": "TabBack",
   "version": "1.0",
   "description": "Switch to the last visited tab with Ctrl+shift+Z",
-  "permissions": ["tabs", "storage", "activeTab"],
+  "permissions": ["storage", "activeTab"],
   "background": {
     "service_worker": "background.js"
   },
